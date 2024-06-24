@@ -1,0 +1,136 @@
+#include <Arduino.h>
+
+#include "Sam.h"
+
+TSam sam(10, 11);
+
+struct ServoMotionRange {
+  int min;
+  int max;
+  int center;
+};
+
+int expectedServoIDs[] = {1, 2, 3, 4, 5, 6, 7, 8};
+
+ServoMotionRange servoMotionRanges[] = {
+    {0, 180, 90}, {0, 180, 90}, {0, 180, 90}, {0, 180, 90},
+    {0, 180, 90}, {0, 180, 90}, {0, 180, 90}, {0, 180, 90}};
+
+int servoPositions[sizeof(expectedServoIDs) / sizeof(expectedServoIDs[0])];
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  Serial.println("Finding servos...");
+  int count;
+  int* servos = sam.findServos(count);
+  // Print the found servo IDs
+  Serial.print("Found servoIDs: [");
+  for (int i = 0; i < count; i++) {
+    Serial.print(servos[i]);
+    if (i < count - 1) {
+      Serial.print(", ");
+    }
+  }
+  Serial.println("]");
+
+  // Define the expected servo IDs
+  int expectedCount = sizeof(expectedServoIDs) / sizeof(expectedServoIDs[0]);
+
+  // Check if the found IDs match the expected ones
+  if (count != expectedCount) {
+    Serial.println("Error: Mismatch in number of servos found.");
+  } else {
+    for (int i = 0; i < count; i++) {
+      if (servos[i] != expectedServoIDs[i]) {
+        Serial.print("Error: Mismatch in servo ID at index ");
+        Serial.println(i);
+      }
+    }
+  }
+  Serial.println("Servo IDs match the expected ones.");
+}
+
+void move(int id, int deg) {
+  // Find the motion range for the servo
+  ServoMotionRange range;
+  for (int i = 0; i < sizeof(expectedServoIDs) / sizeof(expectedServoIDs[0]);
+       i++) {
+    if (expectedServoIDs[i] == id) {
+      range = servoMotionRanges[i];
+      break;
+    }
+  }
+
+  // Calculate the target position
+  int target;
+  if (deg < 0) {
+    target = map(deg, -90, 0, range.min, range.center);
+  } else {
+    target = map(deg, 0, 90, range.center, range.max);
+  }
+
+  // Clamp the target to the min and max values
+  if (target < range.min) {
+    target = range.min;
+  } else if (target > range.max) {
+    target = range.max;
+  }
+
+  // Send a command to move the servo to the target position
+  sam.PosSend(id, target, 4);
+}
+
+void printServoPositions() {
+  Serial.print("Servo positions: [");
+  for (int i = 0; i < sizeof(servoPositions) / sizeof(servoPositions[0]); i++) {
+    Serial.print(servoPositions[i]);
+    if (i < sizeof(servoPositions) / sizeof(servoPositions[0]) - 1) {
+      Serial.print(", ");
+    }
+  }
+  Serial.println("]");
+}
+
+void updateServoPositions() {
+  for (int i = 0; i < sizeof(expectedServoIDs) / sizeof(expectedServoIDs[0]);
+       i++) {
+    int id = expectedServoIDs[i];
+    int pos = sam.PosRead(id);
+    ServoMotionRange range = servoMotionRanges[i];
+
+    // Convert the position to your range
+    if (pos < range.center) {
+      servoPositions[i] = map(pos, range.min, range.center, -90, 0);
+    } else {
+      servoPositions[i] = map(pos, range.center, range.max, 0, 90);
+    }
+  }
+}
+
+void loop() {
+  updateServoPositions();
+  printServoPositions();
+  delay(100);
+}
+
+// digitalWrite(LED_BUILTIN, HIGH);
+// for (int servoID = 0; servoID < 32; servoID++) {
+//   sam.PosSend(servoID, 100, 4);
+//   // sam.PosRead(servoID);
+//   Serial.println();
+//   Serial.println(servoID);
+//   Serial.println();
+//   // Serial.print(': ');
+//   // Serial.println( sam.PosRead(servoID));*/
+//   delay(1000);
+// }
+
+// delay(1000);
+// digitalWrite(LED_BUILTIN, LOW);
+// for (int servoID = 0; servoID < 32; servoID++) {
+//   sam.PosSend(servoID, 160, 4);
+//   delay(1000);
+// }
+// delay(10000);
