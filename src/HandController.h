@@ -23,6 +23,8 @@ class HandController {
   void setToPassiveMode();
   void moveToRaw(int rawAngle);
   void moveToZero();
+  void setTargets(int servoIDs[], int targets[], size_t size);
+  void setTargets(int targets[]);
 
  private:
   static TSam sam;
@@ -33,19 +35,19 @@ class HandController {
       // 1
       {0, 180, 130},
       // 2
-      {0, 180, 130},
+      {0, 180, 125},
       // 3
       {0, 180, 110},
       // 4
-      {0, 230, 130},
+      {0, 230, 120},
       // 5
-      {0, 180, 130},
+      {0, 180, 125},
       // 6
       {0, 230, 120},
       // 7
-      {0, 180, 140},
+      {0, 180, 135},
       // 8
-      {0, 230, 130}};
+      {0, 230, 125}};
   int servoPositions[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   int servoTargets[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   int servoStartPositions[8] = {0, 0, 0, 0, 0, 0, 0, 0};

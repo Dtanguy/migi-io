@@ -35,6 +35,8 @@ void HandController::checkServo() {
 }
 
 void HandController::move(int id, int deg) {
+  if (deg == 666) return;
+
   // Find the motion range for the servo
   ServoMotionRange range;
   int j = 0;
@@ -54,16 +56,31 @@ void HandController::move(int id, int deg) {
   servoStartPositions[j] = servoPositions[j];
 }
 
+void HandController::setTargets(int servoIDs[], int targets[], size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    move(servoIDs[i], targets[i]);
+  }
+}
+
+void HandController::setTargets(int targets[]) {
+  for (size_t i = 0; i < nbServos; i++) {
+    int id = expectedServoIDs[i];
+    move(id, targets[i]);
+  }
+}
+
 void HandController::updateMotion() {
   unsigned long currentTime = millis();
 
   for (size_t i = 0; i < nbServos; i++) {
     int id = expectedServoIDs[i];
+    ServoMotionRange range = servoMotionRanges[i];
+
     int target = servoTargets[i];
     int startPos = servoStartPositions[i];
     unsigned long startTime = servoTargetTimes[i];
     unsigned long elapsedTime = currentTime - startTime;
-    float blendTime = 5000;
+    float blendTime = 500;
 
     if (elapsedTime < blendTime) {
       // Calculate the progress using an ease-in-out function
@@ -123,9 +140,9 @@ void HandController::moveToZero() {
     int id = expectedServoIDs[i];
     ServoMotionRange range = servoMotionRanges[i];
     sam.PosSend(id, 0 + range.center, speedLevel);
-    servoPositions[i] = 0;
-    servoTargets[i] = 0;
+    servoPositions[i] = 0 + range.center;
+    servoTargets[i] = 0 + range.center;
     servoTargetTimes[i] = millis();
-    servoStartPositions[i] = 0;
+    servoStartPositions[i] = 0 + range.center;
   }
 }

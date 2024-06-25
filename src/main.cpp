@@ -13,35 +13,40 @@ void setup() {
   delay(5000);
 }
 
-int target1 = 180;
-int target2 = 0;
-int target = 0;
+int mode = 0;
 unsigned long lastMoveTime = 0;
 
 void loop() {
   // Check if it's time to move the servo
-  if (millis() - lastMoveTime >= 10000) {
-    // Flip the target
-    if (target == target1) {
-      target = target2;
+  if (millis() - lastMoveTime >= 3000) {
+    if (mode < 4) {
+      mode = mode + 1;
     } else {
-      target = target1;
+      mode = 0;
     }
 
-    // Move the servo
-    handController.move(2, -(target / 4));
-    handController.move(4, target);
-    handController.move(6, target);
-    handController.move(8, target);
+    if (mode == 0) {
+      int targets[] = {0, -60, 0, 90, 0, 90, 0, 90};
+      handController.setTargets(targets);
+    } else if (mode == 1) {
+      int targets[] = {0, 0, 0, 0, 0, 0, 0, 0};
+      handController.setTargets(targets);
+    } else if (mode == 2) {
+      int targets[] = {-70, 0, -20, 0, 0, 0, 20, 0};
+      handController.setTargets(targets);
+    } else if (mode == 3) {
+      int targets[] = {-70, -50, -20, 90, 0, 90, 20, 90};
+      handController.setTargets(targets);
+    } else if (mode == 4) {
+      int targets[] = {0, 0, 0, 0, 0, 0, 0, 0};
+      handController.setTargets(targets);
+    }
 
     // Update the last move time
     lastMoveTime = millis();
     Serial.println("Moving servo...");
   }
 
-  // handController.updateServoPositions();
-  // handController.printServoPositions();
   handController.updateMotion();
-  // handController.setToPassiveMode();
   delay(10);
 }
