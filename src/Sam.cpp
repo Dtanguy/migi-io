@@ -103,6 +103,7 @@ int *TSam::findServos(int &count) {
   count = 0;
   for (unsigned char ID = 0; ID < 31; ID++) {
     bool response = this->CheckServo(ID);
+    // Serial.println(response);
     if (response) {
       servos[count++] = ID;
     }

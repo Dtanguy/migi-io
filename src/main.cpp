@@ -6,11 +6,13 @@ HandController handController;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("Starting hand controller...");
+  handController.initLeds();
   handController.checkServo();
   delay(1000);
   handController.moveToZero();
   // handController.setToPassiveMode();
-  delay(5000);
+  delay(50000);
 }
 
 int mode = 0;

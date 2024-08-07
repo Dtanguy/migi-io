@@ -3,9 +3,10 @@
 #ifndef HAND_CONTROLLER_H
 #define HAND_CONTROLLER_H
 
+#include <Adafruit_NeoPixel.h>
+
 #include "Arduino.h"
 #include "Sam.h"
-
 struct ServoMotionRange {
   int min;
   int max;
@@ -15,6 +16,7 @@ struct ServoMotionRange {
 class HandController {
  public:
   HandController();
+  void initLeds();
   void checkServo();
   void move(int id, int deg);
   void updateMotion();
@@ -25,6 +27,7 @@ class HandController {
   void moveToZero();
   void setTargets(int servoIDs[], int targets[], size_t size);
   void setTargets(int targets[]);
+  void setLedColor(int id, uint32_t color);
 
  private:
   static TSam sam;
@@ -53,6 +56,10 @@ class HandController {
   int servoStartPositions[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   unsigned long servoTargetTimes[8] = {millis(), millis(), millis(), millis(),
                                        millis(), millis(), millis(), millis()};
+  // NeoPixel related members
+  static const int LED_PIN = 6;
+  static const int NUM_LEDS = 8;
+  Adafruit_NeoPixel strip;
 };
 
 #endif

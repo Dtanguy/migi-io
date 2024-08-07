@@ -6,7 +6,19 @@ TSam HandController::sam(10, 11);
 
 HandController::HandController() {}
 
+void HandController::initLeds() {
+  Serial.println("Initializing NeoPixel strip...");
+  strip = Adafruit_NeoPixel(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
+  strip.begin();
+  strip.setBrightness(10);
+  for (int i = 0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color(0, 0, 255));
+  }
+  strip.show();
+}
+
 void HandController::checkServo() {
+  /*
   Serial.println("Finding servos...");
   int count;
   int* servos = sam.findServos(count);
@@ -19,19 +31,40 @@ void HandController::checkServo() {
     }
   }
   Serial.println("]");
+*/
 
   // Check if the found IDs match the expected ones
-  if (count != nbServos) {
-    Serial.println("Error: Mismatch in number of servos found.");
-  } else {
-    for (int i = 0; i < count; i++) {
-      if (servos[i] != expectedServoIDs[i]) {
-        Serial.print("Error: Mismatch in servo ID at index ");
-        Serial.println(i);
-      }
+  for (int i = 0; i < nbServos; i++) {
+    bool found = sam.CheckServo(expectedServoIDs[i]);
+
+    if (!found) {
+      Serial.print("Error: Servo ID ");
+      Serial.print(expectedServoIDs[i]);
+      Serial.println(" not found.");
+      strip.setPixelColor(i, strip.Color(255, 0, 0));
+    } else {
+      strip.setPixelColor(i, strip.Color(0, 255, 0));
     }
+    strip.show();
   }
-  Serial.println("Servo IDs match the expected ones.");
+
+  /*
+    if (count != nbServos) {
+      Serial.println("Error: Mismatch in number of servos found.");
+    } else {
+      for (int i = 0; i < count; i++) {
+        if (servos[i] != expectedServoIDs[i]) {
+          Serial.print("Error: Mismatch in servo ID at index ");
+          Serial.println(i);
+          strip.setPixelColor(i, strip.Color(0, 255, 0));
+        } else {
+          strip.setPixelColor(i, strip.Color(0, 255, 0));
+        }
+      }
+      strip.show();
+    }
+    Serial.println("Servo IDs match the expected ones.");
+    */
 }
 
 void HandController::move(int id, int deg) {
@@ -146,3 +179,10 @@ void HandController::moveToZero() {
     servoStartPositions[i] = 0 + range.center;
   }
 }
+
+// void HandController::setLedColor(int id, uint32_t color) {
+//   if (id >= 1 && id <= NUM_LEDS) {
+//     strip.setPixelColor(id - 1, color);
+//     strip.show();
+//   }
+// }
