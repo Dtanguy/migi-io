@@ -7,7 +7,7 @@ TSam HandController::sam(10, 11);
 HandController::HandController() {}
 
 void HandController::initLeds() {
-  Serial.println("Initializing NeoPixel strip...");
+  Serial.println("Initializing NeoPixel leds...");
   strip = Adafruit_NeoPixel(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
   strip.begin();
   strip.setBrightness(10);
@@ -18,22 +18,10 @@ void HandController::initLeds() {
 }
 
 void HandController::checkServo() {
-  /*
-  Serial.println("Finding servos...");
-  int count;
-  int* servos = sam.findServos(count);
-  // Print the found servo IDs
-  Serial.print("Found servoIDs: [");
-  for (int i = 0; i < count; i++) {
-    Serial.print(servos[i]);
-    if (i < count - 1) {
-      Serial.print(", ");
-    }
-  }
-  Serial.println("]");
-*/
+  Serial.println("Check expected servo IDs..");
 
   // Check if the found IDs match the expected ones
+  bool error = false;
   for (int i = 0; i < nbServos; i++) {
     bool found = sam.CheckServo(expectedServoIDs[i]);
 
@@ -42,29 +30,18 @@ void HandController::checkServo() {
       Serial.print(expectedServoIDs[i]);
       Serial.println(" not found.");
       strip.setPixelColor(i, strip.Color(255, 0, 0));
+      error = true;
     } else {
       strip.setPixelColor(i, strip.Color(0, 255, 0));
     }
     strip.show();
   }
 
-  /*
-    if (count != nbServos) {
-      Serial.println("Error: Mismatch in number of servos found.");
-    } else {
-      for (int i = 0; i < count; i++) {
-        if (servos[i] != expectedServoIDs[i]) {
-          Serial.print("Error: Mismatch in servo ID at index ");
-          Serial.println(i);
-          strip.setPixelColor(i, strip.Color(0, 255, 0));
-        } else {
-          strip.setPixelColor(i, strip.Color(0, 255, 0));
-        }
-      }
-      strip.show();
-    }
+  if (error) {
+    Serial.println("Error: Mismatch in number of servos found.");
+  } else {
     Serial.println("Servo IDs match the expected ones.");
-    */
+  }
 }
 
 void HandController::move(int id, int deg) {
